@@ -11,8 +11,8 @@ def inverse_doc_frequency(term: str, total_num_docs=data.doc_count):
     return total_num_docs / data.doc_freq.get(term)
 
 
-def tf_idf(term: str, forground_freqdist: List[str]):
-    return forground_freqdist.freq(term) * math.log2(inverse_doc_frequency(term))
+def tf_idf(term: str, forground_freqdist: nltk.FreqDist):
+    return forground_freqdist.freq(term) * math.log2(inverse_doc_frequency(term) + 1)
 
 # tf-idf(t, d) := tf(t, d) * idf(t)
 # idf(t) := (N/(df(t))
@@ -26,11 +26,15 @@ def calc_all_tfidf(min_count=5):
 
     term_count = len(set(data.back_corpus))
     for i, term in enumerate(set(data.back_corpus)):  # every word used in at least on of the documents
-        print(i, "/", term_count, ":", term)
         count = data.token_count_dict.get(term)
+        if count is None:
+            continue
+        if count < min_count:
+            continue
+        print(i, "/", term_count, ":", term)
         output.write(term + "," + str(count))
-        for fi in data.front_corpus_dict.keys():
-            output.write("," + str(round(tf_idf(term, data.front_corpus_freqdist_dict.get(fi)), 7)))
+        for fi in data.front_corpus_freqdist_dict.keys():
+            output.write("," + str(round(tf_idf(term, data.front_corpus_freqdist_dict.get(fi)), 10)))
         output.write("\n")
 
 
