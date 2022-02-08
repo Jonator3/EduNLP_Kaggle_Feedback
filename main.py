@@ -7,7 +7,9 @@ from nltk.probability import FreqDist
 import data_loader as data
 
 
-def inverse_doc_frequency(term: str, total_num_docs=data.doc_count):
+def inverse_doc_frequency(term: str, total_num_docs=None):
+    if total_num_docs is None:
+        total_num_docs = data.doc_count
     return total_num_docs / data.doc_freq.get(term)
 
 
@@ -24,17 +26,20 @@ def calc_all_tfidf(min_count=5):
     output = open("tf_idf_output.csv", "w")
     output.write("term,total_count,tf_idf(0),tf_idf(1),tf_idf(2),tf_idf(3),tf_idf(4),tf_idf(5),tf_idf(6),tf_idf(7),tf_idf(8),tf_idf(9),tf_idf(10),tf_idf(11),tf_idf(12),tf_idf(13),tf_idf(14)\n")
 
-    term_count = len(set(data.back_corpus))
-    for i, term in enumerate(set(data.back_corpus)):  # every word used in at least on of the documents
+    tokens = list(set(data.back_corpus))
+    tokens.sort()
+    term_count = len(tokens)
+    for i, term in enumerate(tokens):  # every word used in at least on of the documents
         count = data.token_count_dict.get(term)
         if count is None:
             continue
         if count < min_count:
             continue
         print(i, "/", term_count, ":", term)
-        output.write(term + "," + str(count))
+        output.write('"' + term + '",' + str(count))
         for fi in data.front_corpus_freqdist_dict.keys():
-            output.write("," + str(round(tf_idf(term, data.front_corpus_freqdist_dict.get(fi)), 10)))
+            tf_idf_val = tf_idf(term, data.front_corpus_freqdist_dict.get(fi))
+            output.write("," + format(tf_idf_val, ".15f"))
         output.write("\n")
 
 

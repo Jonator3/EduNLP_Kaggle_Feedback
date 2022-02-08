@@ -56,4 +56,6 @@ def load(clusters=15):
             segment_start = i
             current_term = term
     print("loading done")
+    print("totaling", doc_count, "files")
+    print("")
 
