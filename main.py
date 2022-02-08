@@ -10,14 +10,14 @@ import data_loader as data
 def inverse_doc_frequency(term: str, total_num_docs=None):
     if total_num_docs is None:
         total_num_docs = data.doc_count
-    return total_num_docs / data.doc_freq.get(term)
+    return total_num_docs / data.doc_freq.get(term) + 1
 
 
 def tf_idf(term: str, forground_freqdist: nltk.FreqDist):
-    return forground_freqdist.freq(term) * math.log2(inverse_doc_frequency(term) + 1)
+    return forground_freqdist.freq(term) * math.log2(inverse_doc_frequency(term, 15))
 
 # tf-idf(t, d) := tf(t, d) * idf(t)
-# idf(t) := (N/(df(t))
+# idf(t) := log2(N/(df(t)+1)
 # df(t) := anzahl von documenten mit token t
 # tf(t, d) := frequency of t in d = doc_freq_dist.freq(term)
 
