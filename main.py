@@ -1,10 +1,31 @@
 import datetime
 import math
-from typing import List
-
 import nltk
-from nltk.probability import FreqDist
-import data_loader as data
+
+import data_loader
+
+
+def unigram_tokenize(text: str) -> list:
+    return nltk.tokenize.word_tokenize(text)
+
+
+def bigram_tokenize(text: str) -> list:
+    tokens = nltk.tokenize.word_tokenize(text)
+    tokens = list(filter(lambda x: len(x) > 1, tokens))
+    return [(tokens[i], tokens[i + 1]) for i in range(max(len(tokens) - 1, 0))]
+
+
+def trigram_tokenize(text: str) -> list:
+    tokens = nltk.tokenize.word_tokenize(text)
+    tokens = list(filter(lambda x: len(x) > 1, tokens))
+    return [(tokens[i], tokens[i + 1], tokens[i + 2]) for i in range(max(len(tokens) - 2, 0))]
+
+
+def remove_quotes(text: str) -> str:
+    return text.lower().replace("``", "").replace('"', "").replace("¨", "").replace("'", "")
+
+
+data = data_loader.DataLoader(tokenize=trigram_tokenize, preprocess=remove_quotes)
 
 
 def inverse_doc_frequency(term: str, total_num_docs=None):
@@ -13,8 +34,9 @@ def inverse_doc_frequency(term: str, total_num_docs=None):
     return total_num_docs / data.doc_freq.get(term) + 1
 
 
-def tf_idf(term: str, forground_freqdist: nltk.FreqDist):
-    return forground_freqdist.freq(term) * math.log2(inverse_doc_frequency(term, 15))
+def tf_idf(term: str, fg_fd: nltk.FreqDist):
+    return fg_fd.freq(term) * math.log(inverse_doc_frequency(term, 15))
+
 
 # tf-idf(t, d) := tf(t, d) * idf(t)
 # idf(t) := log2(N/(df(t)+1)
@@ -24,7 +46,8 @@ def tf_idf(term: str, forground_freqdist: nltk.FreqDist):
 
 def calc_all_tfidf(min_count=5):
     output = open("tf_idf_output.csv", "w")
-    output.write("term,total_count,tf_idf(0),tf_idf(1),tf_idf(2),tf_idf(3),tf_idf(4),tf_idf(5),tf_idf(6),tf_idf(7),tf_idf(8),tf_idf(9),tf_idf(10),tf_idf(11),tf_idf(12),tf_idf(13),tf_idf(14)\n")
+    output.write(
+        "term,total_count,tf_idf(0),tf_idf(1),tf_idf(2),tf_idf(3),tf_idf(4),tf_idf(5),tf_idf(6),tf_idf(7),tf_idf(8),tf_idf(9),tf_idf(10),tf_idf(11),tf_idf(12),tf_idf(13),tf_idf(14)\n")
 
     tokens = list(set(data.back_corpus))
     tokens.sort()
@@ -36,7 +59,7 @@ def calc_all_tfidf(min_count=5):
         if count < min_count:
             continue
         print(i, "/", term_count, ":", term)
-        output.write('"' + term + '",' + str(count))
+        output.write('"' + str(term) + '",' + str(count))
         for fi in data.front_corpus_freqdist_dict.keys():
             tf_idf_val = tf_idf(term, data.front_corpus_freqdist_dict.get(fi))
             output.write("," + format(tf_idf_val, ".15f"))
@@ -54,10 +77,10 @@ def calc_count_dist():
     output = open("token_count_distribution_output.txt", "w")
 
     for i in range(1000):
-        count = count_dist.get(i+1)
+        count = count_dist.get(i + 1)
         if count is None:
             count = 0
-        print(i+1, ":", count)
+        print(i + 1, ":", count)
         output.write(str(count) + "\n")
 
 
