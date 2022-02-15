@@ -35,7 +35,7 @@ def inverse_doc_frequency(term: str, total_num_docs=None):
 
 
 def tf_idf(term: str, fg_fd: nltk.FreqDist):
-    return fg_fd.freq(term) * math.log(inverse_doc_frequency(term, 15))
+    return fg_fd.freq(term) * math.log(inverse_doc_frequency(term))
 
 
 # tf-idf(t, d) := tf(t, d) * idf(t)
