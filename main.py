@@ -2,30 +2,15 @@ import datetime
 import math
 import nltk
 
+from preprocess import *
+import tokenizers
 import data_loader
 
 
-def unigram_tokenize(text: str) -> list:
-    return nltk.tokenize.word_tokenize(text)
-
-
-def bigram_tokenize(text: str) -> list:
-    tokens = nltk.tokenize.word_tokenize(text)
-    tokens = list(filter(lambda x: len(x) > 1, tokens))
-    return [(tokens[i], tokens[i + 1]) for i in range(max(len(tokens) - 1, 0))]
-
-
-def trigram_tokenize(text: str) -> list:
-    tokens = nltk.tokenize.word_tokenize(text)
-    tokens = list(filter(lambda x: len(x) > 1, tokens))
-    return [(tokens[i], tokens[i + 1], tokens[i + 2]) for i in range(max(len(tokens) - 2, 0))]
-
-
-def remove_quotes(text: str) -> str:
-    return text.lower().replace("``", "").replace('"', "").replace("¨", "").replace("'", "")
-
-
-data = data_loader.DataLoader(tokenize=trigram_tokenize, preprocess=remove_quotes)
+data = data_loader.DataLoader(
+    tokenize=tokenizers.unigram_tokenize,
+    preprocess=compose(lower, remove_quotes)
+)
 
 
 def inverse_doc_frequency(term: str, total_num_docs=None):
