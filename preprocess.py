@@ -21,7 +21,7 @@ def remove_quotes(text: str) -> str:
     :param text: The input text that will be preprocessed
     :return: The input text without quotation-marks
     """
-    return text.replace("``", "").replace('"', "").replace("¨", "").replace("'", "")
+    return replace_with_nothing(text, ["`", '"', "¨", "'", "`", "´"])
 
 
 def lower(text: str) -> str:
