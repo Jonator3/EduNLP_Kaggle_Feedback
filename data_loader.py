@@ -27,6 +27,15 @@ def count_token(corpus):
     return token_count
 
 
+def ngram_tokenize(text: str, n: int) -> list:
+    tokens = nltk.tokenize.word_tokenize(text)
+    ngrams = []
+    for i in range(max(len(tokens) - (n-1), 0)):
+        ngram = tuple([tokens[i + j] for j in range(n)])
+        ngrams.append(ngram)
+    return ngrams
+
+
 class DataSet:
 
     def __init__(self, fc, df, dc, tc, n):

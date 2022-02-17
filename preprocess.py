@@ -1,4 +1,11 @@
 import functools
+import re
+
+
+def replace_with_nothing(text: str, replacements: list[str]):
+    for replacement in replacements:
+        text = text.replace(replacement, "")
+    return text
 
 
 def compose(*functions):
@@ -34,3 +41,15 @@ def lower(text: str) -> str:
     return text.lower()
 
 
+def remove_punctuation(text: str) -> str:
+    """
+    Removes every punctuation-marks from text and returns the result.
+    :param text: The input text that will be preprocessed
+    :return: The input text without punctuation-marks
+    """
+    return replace_with_nothing(text, [".", ",", "!", "?", ":", ";"])
+
+
+def remove_short_tokens(text: str) -> str:
+
+    return re.sub(r" (.|..) ", " ", text)
