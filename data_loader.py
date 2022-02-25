@@ -4,12 +4,10 @@ from typing import Callable, List
 import nltk
 
 
-def get_file_token(file_path: str, n_gram, preprocess: Callable[[str], str]):
+def get_file(file_path: str):
     with open(file_path, "r") as file:
-        token = []
-        for line in file.readlines():
-            token += ngram_tokenize(preprocess(line), n_gram)
-        return token
+        lines = file.readlines()
+        return " ".join(lines)
 
 
 def count_token(corpus):
@@ -27,12 +25,20 @@ def count_token(corpus):
     return token_count
 
 
-def ngram_tokenize(text: str, n: int) -> list:
+def ngram_tokenize(text: str, n: int, preprocess: Callable[[str], str] = None,
+                   post_tokenize_process: Callable[[List[str]], List[str]] = None,
+                   post_ngram_process: Callable[[List[tuple[str]], int], List[tuple[str]]] = None) -> List[tuple[str]]:
+    if preprocess is not None:
+        text = preprocess(text)
     tokens = nltk.tokenize.word_tokenize(text)
+    if post_tokenize_process is not None:
+        tokens = post_tokenize_process(tokens)
     ngrams = []
     for i in range(max(len(tokens) - (n-1), 0)):
         ngram = tuple([tokens[i + j] for j in range(n)])
         ngrams.append(ngram)
+    if post_ngram_process is not None:
+        ngrams = post_ngram_process(ngrams, n)
     return ngrams
 
 
@@ -55,7 +61,7 @@ class DataSet:
         return bkc
 
 
-def load(clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = lambda x: x) -> DataSet:
+def load(clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = None, post_tokenize_process: Callable[[List[str]], List[str]] = None, post_ngram_process: Callable[[List[tuple[str]]], List[tuple[str]]] = None) -> DataSet:
     if n_gram < 1:
         raise ValueError("n_gram parameter must be int > 0!")
     doc_count = 0
@@ -66,7 +72,8 @@ def load(clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = lambda
         token = []
         print("loading cluster", i)
         for file in os.listdir("clusters/" + str(i)):
-            sub_token = get_file_token("clusters/" + str(i) + "/" + file, n_gram, preprocess)
+            raw_text = get_file("clusters/" + str(i) + "/" + file)
+            sub_token = ngram_tokenize(raw_text, n_gram, preprocess, post_tokenize_process, post_ngram_process)
             doc_count += 1
             token += sub_token
             for t in set(sub_token):

@@ -4,12 +4,11 @@ import sys
 
 import nltk
 
-from preprocess import *
-import tokenizers
+from preprocessing import *
 import data_loader
 
-
-
+closed_class_ptags = ["Cd", "CC", "DT", "EX", "IN", "LS", "MD", "PDT", "POS",
+                      "PRP", "PRP$", "RP", "TO", "UH", "WDT", "WP", "WP$", "WRB"]
 
 
 def inverse_doc_frequency(term: str, data):
@@ -19,6 +18,11 @@ def inverse_doc_frequency(term: str, data):
 
 def tf_idf(term: str, fg_fd: nltk.FreqDist, data):
     return fg_fd.freq(term) * math.log(inverse_doc_frequency(term, data))
+
+
+def filter_closed_class_words(words: list[str]):
+    tagged_words = nltk.pos_tag(words)
+    return [tagged_word[0] for tagged_word in tagged_words if tagged_word[1] not in closed_class_ptags]
 
 
 # tf-idf(t, d) := tf(t, d) * idf(t)
@@ -69,9 +73,13 @@ def calc_count_dist(data):
 
 for n in range(1, 4):
     start_time = datetime.datetime.now()
-    print("running", str(n) + "-gram", start_time)
+    print("\nrunning", str(n) + "-gram", start_time)
 
-    data = data_loader.load(n_gram=n, preprocess=compose(lower, remove_quotes, remove_punctuation))
+    data = data_loader.load(
+        n_gram=n,
+        preprocess=compose(lower, remove_quotes, remove_punctuation),
+        post_tokenize_process=filter_closed_class_words
+    )
 
     calc_all_tfidf(data)
 
