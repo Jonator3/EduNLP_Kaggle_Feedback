@@ -60,14 +60,17 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     print("Starting text_modifier.py", start)
 
+    n = 500
+
     csv_file = "eval_1_output.csv"
     print("loading", csv_file)
-    words = get_prompt_specific_terms(csv_file)
+    words = get_prompt_specific_terms(csv_file, n)
 
     print("")
     generate_modified_texts(
         words,
-        preprocess=preprocessing.compose(preprocessing.lower, preprocessing.remove_quotes, preprocessing.remove_punctuation)
+        preprocess=preprocessing.compose(preprocessing.lower, preprocessing.remove_quotes, preprocessing.remove_punctuation),
+        output_folder="modified_clusters" + str(n)
     )
 
     print("Done!")
