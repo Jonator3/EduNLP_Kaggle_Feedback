@@ -1,3 +1,4 @@
 /clusters/
 /test.py
-/modified_clusters_300/
+/modified_clusters*
+/*.csv
