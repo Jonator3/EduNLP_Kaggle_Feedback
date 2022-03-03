@@ -20,7 +20,7 @@ def parse_ngram(text: str):
     return tuple(text.split("', '"))
 
 
-def get_prompt_specific_terms(csv_file, n=150):
+def get_prompt_specific_terms(csv_file, n=150) -> List[set[str]]:
     table: list[tuple] = []
     with open(csv_file, "r") as file:
         reader = csv.reader(file)
@@ -31,9 +31,21 @@ def get_prompt_specific_terms(csv_file, n=150):
 
     sorted_terms = []
     for cluster in range(2, len(table[0])):
-        for term in [eval(row[0]) for row in sorted(table, key=lambda x: float(x[cluster]), reverse=True)][:n]:
-            sorted_terms += list(term)
-    return set(sorted_terms)
+        sorted_terms.append([eval(row[0]) for row in sorted(table, key=lambda x: float(x[cluster]), reverse=True)][:n])
+
+    output = []
+    for terms in sorted_terms:
+        l = []
+        for term in terms:
+            for word in term:
+                l.append(word)
+        output.append(set(l))
+
+    return output
+
+
+closed_class_ptags = ["Cd", "CC", "DT", "EX", "IN", "LS", "MD", "PDT", "POS",
+                      "PRP", "PRP$", "RP", "TO", "UH", "WDT", "WP", "WP$", "WRB"]
 
 
 def generate_modified_texts(important_words: List[set[str]], preprocess: Callable[[str], str] = None, input_folder="clusters",
