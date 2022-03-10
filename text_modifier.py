@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     n = 1000
 
-    csv_file = "eval_1_output.csv"
+    csv_file = "tf_idf_1_output.csv"
     print("loading", csv_file)
     words = get_prompt_specific_terms(csv_file, n)
 

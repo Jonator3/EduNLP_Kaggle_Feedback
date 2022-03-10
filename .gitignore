@@ -2,4 +2,5 @@
 /test.py
 /modified_clusters*
 /*.csv
+/old_data/
 /goldstandard-clusters/
