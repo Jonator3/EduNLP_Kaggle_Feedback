@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
 import csv
 
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def wordcount_prediction_string(p_str: str) -> int:
-    return len(p_str.split())
+    split = p_str.split()
+    return len(split)
 
 
 def normalize(a: list) -> list:
@@ -38,7 +42,9 @@ def analyse_cluster(
             label = row[column_class]
             if label in labels:
                 label_counts[label_indices[label]] += 1
-                word_counts[label].append(wordcount_prediction_string(row[column_prediction_string]))
+                wc = wordcount_prediction_string(row[column_prediction_string])
+                word_counts[label].append(wc)
+
         print("Read", count, "rows of", filename)
 
     return label_counts, word_counts
@@ -48,16 +54,9 @@ def plot_lf_wc(label_frequencies, word_counts, labels):
     _, (ax, axb) = plt.subplots(1, 2, figsize=(12, 5))
     ax.set_title("label-distribution")
     ax.bar(labels, label_frequencies)
+    ax.set_xticklabels(labels, rotation=45)
     axb.boxplot(word_counts.values())
     axb.set_xticklabels(labels, rotation=45)
-    axb.set_title("# tokens")
+    axb.set_title("token counts")
     plt.show()
 
-
-def plot_all_clusters(data, labels):
-    _, ax = plt.subplots(len(data), len(data[0]), figsize=(12, 100))
-    for i, d in enumerate(data):
-        ax[i][0].set_title("cluster " + str(i))
-        ax[i][0].bar(labels, normalize(d[0]))
-        ax[i][1].boxplot(d[1].values())
-        ax[i][1].set_xticklabels(labels, rotation=45)

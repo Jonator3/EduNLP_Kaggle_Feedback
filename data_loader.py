@@ -61,9 +61,13 @@ class DataSet:
         return bkc
 
 
-def load(clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = None, post_tokenize_process: Callable[[List[str]], List[str]] = None, post_ngram_process: Callable[[List[tuple[str]]], List[tuple[str]]] = None) -> DataSet:
+def load(input_folder: str, clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = None, post_tokenize_process: Callable[[List[str]], List[str]] = None, post_ngram_process: Callable[[List[tuple[str]]], List[tuple[str]]] = None) -> DataSet:
     if n_gram < 1:
         raise ValueError("n_gram parameter must be int > 0!")
+    if not os.path.isdir(input_folder):
+        raise FileNotFoundError("input_folder: '" + input_folder + "' does not exist or is not a folder!")
+    if not input_folder.endswith("/"):
+        input_folder += "/"
     doc_count = 0
     doc_freq = {}
     front_corpora = []
@@ -71,8 +75,8 @@ def load(clusters=15, n_gram: int = 1, preprocess: Callable[[str], str] = None, 
     for i in range(clusters):
         token = []
         print("loading cluster", i)
-        for file in os.listdir("clusters/" + str(i)):
-            raw_text = get_file("clusters/" + str(i) + "/" + file)
+        for file in os.listdir(input_folder + str(i)):
+            raw_text = get_file(input_folder + str(i) + "/" + file)
             sub_token = ngram_tokenize(raw_text, n_gram, preprocess, post_tokenize_process, post_ngram_process)
             doc_count += 1
             token += sub_token
