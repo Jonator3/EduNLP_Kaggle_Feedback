@@ -32,7 +32,9 @@ def filter_closed_class_words(words: list[str]):
 
 
 def calc_all_tfidf(data, min_count=5, output_path=None):
-    output = open("tf_idf_"+str(data.n_gram)+"_output.csv", "w")
+    if output_path is None:
+        output_path = "tf_idf_"+str(data.n_gram)+"_output.csv"
+    output = open(output_path, "w")
     output.write(
         "term,total_count,tf_idf(0),tf_idf(1),tf_idf(2),tf_idf(3),tf_idf(4),tf_idf(5),tf_idf(6),tf_idf(7),tf_idf(8),tf_idf(9),tf_idf(10),tf_idf(11),tf_idf(12),tf_idf(13),tf_idf(14)\n")
 
@@ -75,11 +77,16 @@ if __name__ == '__main__':
     arg_pars = ArgumentParser()
     arg_pars.add_argument("input_folder", help="The path to the directory containing the clusters", default=None)
     arg_pars.add_argument("n", help="n-gram length", type=int, default=None)
+    arg_pars.add_argument("--min-count", help="minimum count of an n-gram to be considered in the output", type=int, default=5)
+    arg_pars.add_argument("--output", help="full path used for the output", default=None)
     args = arg_pars.parse_args()
+
+    min_count = args.min_count
+    output_path = args.output
 
     input_folder = args.input_folder  # path to the input clusters
     if input_folder is None:
-        input_folder = input_folder("Enter the path to the input clusters:\n")
+        input_folder = input("Enter the path to the input clusters:\n")
         print("")
 
     n = args.n  # n for n-grams
@@ -101,6 +108,6 @@ if __name__ == '__main__':
         post_tokenize_process=filter_closed_class_words
     )
 
-    calc_all_tfidf(data)
+    calc_all_tfidf(data, min_count, output_path)
 
     print("\nTime:", datetime.datetime.now() - start_time)

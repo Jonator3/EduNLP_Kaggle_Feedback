@@ -1,6 +1,6 @@
 import csv
 import datetime
-import sys
+from argparse import ArgumentParser
 from typing import Callable, List
 from operator import xor
 import subprocess
@@ -10,6 +10,10 @@ import os
 
 import data_loader
 import preprocessing
+
+
+closed_class_ptags = ["Cd", "CC", "DT", "EX", "IN", "LS", "MD", "PDT", "POS",
+                      "PRP", "PRP$", "RP", "TO", "UH", "WDT", "WP", "WP$", "WRB"]
 
 
 def parse_ngram(text: str):
@@ -42,10 +46,6 @@ def get_prompt_specific_terms(csv_file, n=150) -> List[set[str]]:
         output.append(set(l))
 
     return output
-
-
-closed_class_ptags = ["Cd", "CC", "DT", "EX", "IN", "LS", "MD", "PDT", "POS",
-                      "PRP", "PRP$", "RP", "TO", "UH", "WDT", "WP", "WP$", "WRB"]
 
 
 def generate_modified_texts(important_words: List[set[str]], preprocess: Callable[[str], str] = None, input_folder="clusters",
@@ -84,28 +84,49 @@ def generate_modified_texts(important_words: List[set[str]], preprocess: Callabl
 
 
 if __name__ == "__main__":
+    arg_pars = ArgumentParser()
+    arg_pars.add_argument("input_file", help="The path to the directory containing the clusters", default=None)
+    arg_pars.add_argument("boarder-position", help="the boarder at witch to separate the tokens in the output", type=int, default=None)
+    arg_pars.add_argument("--output", help="full path used for the output", default=None)
+    args = arg_pars.parse_args()
+
+    csv_file = args.input_folder  # path to the input clusters
+    if csv_file is None:
+        csv_file = input("Enter the path to the input file:\n")
+        print("")
+
+    n = args.boarder_position
+    if n is None:
+        n = input("Enter boarder position:\n")
+        print("")
+        while not n.isdigit():
+            n = input("Input must be an Integer!\nEnter n-gram length:\n")
+            print("")
+        n = int(n)
+    
+    output_path = args.output
+    if output_path is None:
+        output_path = "modified_clusters" + str(n)
+    
     start = datetime.datetime.now()
     print("Starting text_modifier.py", start)
 
-    n = 1000
-
-    csv_file = "tf_idf_1_output.csv"
     print("loading", csv_file)
     words = get_prompt_specific_terms(csv_file, n)
 
     print("")
-    print("generate", "modified_clusters" + str(n))
+    print("generate", output_path)
     generate_modified_texts(
         words,
         preprocess=preprocessing.compose(preprocessing.lower, preprocessing.remove_quotes, preprocessing.remove_punctuation),
-        output_folder="modified_clusters" + str(n)
+        output_folder=output_path
     )
     print("")
-    print("generate", "modified_clusters" + str(n) + "_inv")
+    print("generate", output_path + "_inv")
     generate_modified_texts(
         words,
         preprocess=preprocessing.compose(preprocessing.lower, preprocessing.remove_quotes, preprocessing.remove_punctuation),
-        output_folder="modified_clusters" + str(n) + "_inv",
+        output_folder=output_path + "_inv",
         inverted=True
     )
 
